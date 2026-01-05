@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>给姐姐的专属网页</title>
   <style>
     body {
@@ -14,30 +14,44 @@
       background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
       font-family: "Microsoft YaHei", sans-serif;
       overflow: hidden;
-      touch-action: manipulation; /* 优化移动端点击 */
+      touch-action: manipulation;
     }
     .container {
       text-align: center;
       background: rgba(255, 255, 255, 0.9);
-      padding: 40px;
-      border-radius: 30px;
-      box-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(255, 107, 107, 0.2);
       z-index: 10;
       width: 85%;
-      max-width: 400px;
+      max-width: 350px; /* 缩小容器适配手机 */
     }
-    h1 { color: #e53e3e; font-size: 1.8rem; margin-bottom: 30px; line-height: 1.4; }
-    .btns { display: flex; justify-content: center; gap: 20px; position: relative; height: 60px; }
+    h1 { color: #e53e3e; font-size: 1.5rem; margin-bottom: 30px; line-height: 1.4; }
+
+    /* 关键修复：使用 flex 布局让按钮初始状态不重叠 */
+    .btns {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      position: relative;
+      height: 100px; /* 给按钮跳动留出空间 */
+    }
+
     button {
-      padding: 12px 30px;
-      font-size: 18px;
+      padding: 12px 25px;
+      font-size: 16px;
       cursor: pointer;
       border: none;
       border-radius: 50px;
-      transition: all 0.2s;
+      transition: transform 0.2s, background 0.3s;
+      -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
     }
-    #yes { background: #ff7675; color: white; z-index: 11; }
-    #no { background: #b2bec3; color: white; position: absolute; transition: all 0.1s ease; }
+
+    #yes { background: #ff7675; color: white; box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3); }
+
+    /* 不愿意按钮：初始为静态，只有触发时才定位 */
+    #no { background: #b2bec3; color: white; position: relative; }
+
     .heart { position: absolute; font-size: 20px; animation: move 3s linear infinite; z-index: 5; }
     @keyframes move {
       0% { transform: translateY(0) rotate(0deg); opacity: 1; }
@@ -45,7 +59,9 @@
     }
   </style>
 </head>
-<body onclick="initAudio()"> <audio id="bgMusic" loop preload="auto">
+<body onclick="initAudio()">
+
+<audio id="bgMusic" loop preload="auto">
   <source src="bgm.mp3" type="audio/mpeg">
 </audio>
 
@@ -53,7 +69,7 @@
   <h1 id="question">姐姐，你愿意请你弟弟吃好吃的吗？🥺</h1>
   <div class="btns">
     <button id="yes" onclick="celebrate()">愿意</button>
-    <button id="no" onmouseover="flyAway()" onclick="flyAway()">不愿意</button>
+    <button id="no" onmouseover="flyAway()" ontouchstart="flyAway()">不愿意</button>
   </div>
 </div>
 
@@ -61,37 +77,38 @@
   const audio = document.getElementById('bgMusic');
   let isAudioInited = false;
 
-  // 预热音频：解决浏览器拦截
+  // 点击页面任意地方预热音频
   function initAudio() {
     if (!isAudioInited) {
-      audio.load(); // 预加载
+      audio.load();
       isAudioInited = true;
     }
   }
 
   function flyAway() {
     const btn = document.getElementById('no');
+    // 第一次触发时切换到固定定位，防止挤压原布局
+    btn.style.position = 'fixed';
+
+    // 随机计算位置，确保在可见范围内
     const x = Math.random() * (window.innerWidth - btn.offsetWidth);
     const y = Math.random() * (window.innerHeight - btn.offsetHeight);
-    btn.style.position = 'fixed';
+
     btn.style.left = x + 'px';
     btn.style.top = y + 'px';
   }
 
   function celebrate() {
-    // 尝试播放
-    const playPromise = audio.play();
-
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.log("播放失败，尝试静音播放再取消静音");
-        audio.muted = true;
-        audio.play();
-      });
-    }
+    // 播放音乐
+    audio.play().catch(() => {
+      audio.muted = true;
+      audio.play();
+    });
 
     document.getElementById('question').innerHTML = "我就知道！你是全天下最好的姐姐！💖";
-    document.getElementById('no').style.display = 'none';
+    document.getElementById('no').style.display = 'none'; // 藏起来
+    document.getElementById('yes').style.transform = 'scale(1.2)'; // 按钮变大点
+
     setInterval(createHeart, 200);
   }
 
