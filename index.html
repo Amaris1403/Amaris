@@ -3,100 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>给姐姐的小测试</title>
+  <title>给姐姐的专属网页</title>
   <style>
-    /* 让整个页面内容水平垂直居中 */
     body {
       margin: 0;
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #fffaf0; /* 温暖的米白色背景 */
+      background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
       font-family: "Microsoft YaHei", sans-serif;
       overflow: hidden;
     }
-
-    .card {
+    .container {
       text-align: center;
-      padding: 40px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
+      z-index: 10;
     }
-
-    h1 {
-      color: #333;
-      font-size: 28px;
-      margin-bottom: 40px;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    /* 按钮通用样式 */
+    h1 { color: #e53e3e; font-size: 2.5rem; margin-bottom: 40px; }
+    .btns { display: flex; justify-content: center; gap: 30px; position: relative; }
     button {
-      padding: 12px 35px;
-      font-size: 18px;
+      padding: 15px 40px;
+      font-size: 20px;
       cursor: pointer;
       border: none;
       border-radius: 50px;
-      transition: all 0.3s ease;
+      transition: all 0.3s;
     }
+    #yes { background: #ff7675; color: white; box-shadow: 0 5px 15px rgba(255, 118, 117, 0.4); }
+    #no { background: #b2bec3; color: white; position: relative; }
 
-    /* “愿意”按钮：粉红色 */
-    .btn-yes {
-      background-color: #ff6b6b;
-      color: white;
+    /* 爱心样式 */
+    .heart {
+      position: absolute;
+      font-size: 20px;
+      color: #ff7675;
+      animation: move 3s linear infinite;
+      z-index: 5;
     }
-
-    .btn-yes:hover {
-      transform: scale(1.1);
-      background-color: #ee5253;
-    }
-
-    /* “不愿意”按钮：灰色 */
-    .btn-no {
-      background-color: #bdc3c7;
-      color: white;
-    }
-
-    .btn-no:hover {
-      background-color: #95a5a6;
+    @keyframes move {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
     }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>你愿意请你弟弟吃好吃的吗？</h1>
-  <div class="buttons">
-    <button class="btn-yes" onclick="handleAgree()">愿意</button>
-    <button class="btn-no" onclick="handleRefuse()">不愿意</button>
+<div class="container">
+  <h1>姐姐，你愿意请你弟弟吃好吃的吗？🥺</h1>
+  <div class="btns">
+    <button id="yes" onclick="celebrate()">愿意</button>
+    <button id="no" onmouseover="flyAway()">不愿意</button>
   </div>
 </div>
 
 <script>
-  let refuseCount = 0; // 记录点击“不愿意”的次数
-
-  // 点击“愿意”的逻辑
-  function handleAgree() {
-    alert("✨ 你是全天下最好的姐姐！✨");
+  // 按钮跑路逻辑
+  function flyAway() {
+    const btn = document.getElementById('no');
+    const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+    const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+    btn.style.position = 'fixed';
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
   }
 
-  // 点击“不愿意”的逻辑
-  function handleRefuse() {
-    refuseCount++;
-
-    if (refuseCount === 1) {
-      alert("再考虑一下呢？🥺");
-    } else {
-      alert("❌ 拒绝失败！(姐姐你是逃不掉哒~)");
-      refuseCount = 0; // 重置次数，允许循环
+  // 点击愿意后的庆祝逻辑
+  function celebrate() {
+    alert("我就知道！你是全天下最好的姐姐！💖");
+    // 生成满屏爱心
+    for (let i = 0; i < 50; i++) {
+      createHeart();
     }
+  }
+
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.innerHTML = '❤️';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 3000);
   }
 </script>
 
