@@ -11,95 +11,90 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      /* 渐变粉色背景 */
       background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
       font-family: "Microsoft YaHei", sans-serif;
       overflow: hidden;
+      touch-action: manipulation; /* 优化移动端点击 */
     }
     .container {
       text-align: center;
       background: rgba(255, 255, 255, 0.9);
-      padding: 50px;
+      padding: 40px;
       border-radius: 30px;
       box-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
       z-index: 10;
-      width: 80%;
-      max-width: 500px;
+      width: 85%;
+      max-width: 400px;
     }
-    h1 { color: #e53e3e; font-size: 2rem; margin-bottom: 40px; }
-    .btns { display: flex; justify-content: center; gap: 30px; position: relative; }
+    h1 { color: #e53e3e; font-size: 1.8rem; margin-bottom: 30px; line-height: 1.4; }
+    .btns { display: flex; justify-content: center; gap: 20px; position: relative; height: 60px; }
     button {
-      padding: 15px 35px;
+      padding: 12px 30px;
       font-size: 18px;
       cursor: pointer;
       border: none;
       border-radius: 50px;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
-    #yes { background: #ff7675; color: white; box-shadow: 0 5px 15px rgba(255, 118, 117, 0.4); }
-    #no { background: #b2bec3; color: white; position: absolute; left: 60%; }
-
-    /* 飘落爱心的样式 */
-    .heart {
-      position: absolute;
-      font-size: 20px;
-      color: #ff7675;
-      animation: move 3s linear infinite;
-      z-index: 5;
-    }
+    #yes { background: #ff7675; color: white; z-index: 11; }
+    #no { background: #b2bec3; color: white; position: absolute; transition: all 0.1s ease; }
+    .heart { position: absolute; font-size: 20px; animation: move 3s linear infinite; z-index: 5; }
     @keyframes move {
       0% { transform: translateY(0) rotate(0deg); opacity: 1; }
       100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
     }
   </style>
 </head>
-<body>
-
-<audio id="bgMusic" loop>
+<body onclick="initAudio()"> <audio id="bgMusic" loop preload="auto">
   <source src="bgm.mp3" type="audio/mpeg">
-  您的浏览器不支持音频播放。
 </audio>
 
 <div class="container">
   <h1 id="question">姐姐，你愿意请你弟弟吃好吃的吗？🥺</h1>
-  <div class="btns" id="btnContainer">
+  <div class="btns">
     <button id="yes" onclick="celebrate()">愿意</button>
-    <button id="no" onmouseover="flyAway()">不愿意</button>
+    <button id="no" onmouseover="flyAway()" onclick="flyAway()">不愿意</button>
   </div>
 </div>
 
 <script>
-  // 1. 让“不愿意”按钮永远躲着鼠标
+  const audio = document.getElementById('bgMusic');
+  let isAudioInited = false;
+
+  // 预热音频：解决浏览器拦截
+  function initAudio() {
+    if (!isAudioInited) {
+      audio.load(); // 预加载
+      isAudioInited = true;
+    }
+  }
+
   function flyAway() {
     const btn = document.getElementById('no');
-    // 计算随机位置，确保按钮不会跑出屏幕外
     const x = Math.random() * (window.innerWidth - btn.offsetWidth);
     const y = Math.random() * (window.innerHeight - btn.offsetHeight);
-
     btn.style.position = 'fixed';
     btn.style.left = x + 'px';
     btn.style.top = y + 'px';
   }
 
-  // 2. 点击“愿意”后的惊喜
   function celebrate() {
-    // 修改标题文字
+    // 尝试播放
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.log("播放失败，尝试静音播放再取消静音");
+        audio.muted = true;
+        audio.play();
+      });
+    }
+
     document.getElementById('question').innerHTML = "我就知道！你是全天下最好的姐姐！💖";
-
-    // 播放你上传的 bgm.mp3
-    const audio = document.getElementById('bgMusic');
-    audio.play().catch(e => {
-      console.log("音频播放被浏览器拦截，通常点击按钮后即可正常播放");
-    });
-
-    // 隐藏“不愿意”按钮
     document.getElementById('no').style.display = 'none';
-
-    // 持续生成爱心特效
     setInterval(createHeart, 200);
   }
 
-  // 3. 创建爱心的函数
   function createHeart() {
     const heart = document.createElement('div');
     heart.classList.add('heart');
@@ -108,11 +103,8 @@
     heart.style.top = '100vh';
     heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
     document.body.appendChild(heart);
-
-    // 3秒后自动删除，防止占用内存
     setTimeout(() => heart.remove(), 3000);
   }
 </script>
-
 </body>
 </html>
