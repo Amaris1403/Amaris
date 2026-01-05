@@ -14,50 +14,45 @@
       background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
       font-family: "Microsoft YaHei", sans-serif;
       overflow: hidden;
-      /* 防止双击缩放 */
       touch-action: manipulation;
     }
     .container {
       text-align: center;
-      background: rgba(255, 255, 255, 0.9);
-      /* 调整内边距适配小屏幕 */
+      background: rgba(255, 255, 255, 0.95);
       padding: 35px 25px;
       border-radius: 30px;
       box-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
       z-index: 10;
-      /* 宽度适配移动端 */
       width: 85%;
       max-width: 450px;
     }
     h1 { color: #e53e3e; font-size: 1.6rem; margin-bottom: 35px; line-height: 1.4; }
 
-    /* --- 核心修复区域 开始 --- */
+    /* 按钮布局：弹性分布，确保不重叠 */
     .btns {
-      display: flex; /* 使用弹性布局 */
-      justify-content: center; /* 居中对齐 */
-      gap: 25px; /* 两个按钮之间保持固定距离，绝不重叠 */
+      display: flex;
+      justify-content: center;
+      gap: 25px;
       margin-top: 20px;
-      min-height: 50px; /* 占位防抖动 */
+      min-height: 60px; /* 预留高度 */
     }
 
     button {
-      padding: 12px 28px; /* 调整按钮大小 */
+      padding: 12px 28px;
       font-size: 17px;
       cursor: pointer;
       border: none;
       border-radius: 50px;
       transition: all 0.3s;
-      white-space: nowrap; /* 防止文字换行 */
-      -webkit-tap-highlight-color: transparent; /* 取消点击高亮 */
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      font-weight: bold;
     }
 
     #yes { background: #ff7675; color: white; box-shadow: 0 5px 15px rgba(255, 118, 117, 0.4); }
-
-    /* 重点：初始状态下，“不愿意”按钮就是个普通按钮，不再悬浮定位 */
     #no { background: #b2bec3; color: white; }
-    /* --- 核心修复区域 结束 --- */
 
-    /* 爱心动画样式 */
+    /* 爱心动画 */
     .heart {
       position: absolute;
       font-size: 20px;
@@ -73,7 +68,7 @@
 </head>
 <body>
 
-<audio id="bgMusic" loop>
+<audio id="bgMusic" loop preload="auto">
   <source src="bgm.mp3" type="audio/mpeg">
 </audio>
 
@@ -86,38 +81,57 @@
 </div>
 
 <script>
-  // 1. 让“不愿意”按钮永远躲着鼠标/手指
+  // --- 核心修复：解决“点两下才响”的问题 ---
+  const audio = document.getElementById('bgMusic');
+
+  // 只要姐姐手指触碰屏幕任何地方，就立刻静默加载音频
+  function unlockAudio() {
+    audio.load(); // 强制预加载
+    // 尝试播放一瞬间然后立刻暂停，目的是“骗”过浏览器的安全限制
+    let playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(_ => {
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(error => {
+        // 此时可能还被拦截，但没关系，我们已经尽力预热了
+      });
+    }
+    // 解锁后移除监听，避免重复执行
+    document.body.removeEventListener('touchstart', unlockAudio);
+    document.body.removeEventListener('click', unlockAudio);
+  }
+
+  // 监听全局点击和触摸
+  document.body.addEventListener('touchstart', unlockAudio);
+  document.body.addEventListener('click', unlockAudio);
+  // ---------------------------------------
+
   function flyAway() {
     const btn = document.getElementById('no');
-
-    // 【关键一步】手指碰到后，才把按钮变成“固定定位”，让它能满屏跑
-    btn.style.position = 'fixed';
-
-    // 计算随机位置，确保不跑出屏幕外
+    btn.style.position = 'fixed'; // 触发后才悬浮
     const x = Math.random() * (window.innerWidth - btn.offsetWidth);
     const y = Math.random() * (window.innerHeight - btn.offsetHeight);
-
     btn.style.left = x + 'px';
     btn.style.top = y + 'px';
   }
 
-  // 2. 点击“愿意”后的庆祝逻辑
   function celebrate() {
     document.getElementById('question').innerHTML = "我就知道！你是全天下最好的姐姐！💖";
 
-    // 播放音乐
-    const audio = document.getElementById('bgMusic');
-    audio.play().catch(e => { console.log("请点击页面触发播放"); });
+    // 再次强制播放，双重保险
+    audio.play().catch(e => console.log("播放异常"));
 
-    // 隐藏“不愿意”按钮
-    const noBtn = document.getElementById('no');
-    noBtn.style.display = 'none';
+    document.getElementById('no').style.display = 'none';
 
-    // 生成满屏爱心
+    // 让愿意按钮动一下，增加交互感
+    const yesBtn = document.getElementById('yes');
+    yesBtn.innerText = "爱你哟 😘";
+    yesBtn.style.transform = "scale(1.1)";
+
     setInterval(createHeart, 200);
   }
 
-  // 3. 创建爱心
   function createHeart() {
     const heart = document.createElement('div');
     heart.classList.add('heart');
