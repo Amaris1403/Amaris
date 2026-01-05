@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>给姐姐的专属网页</title>
-
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥺</text></svg>">
   <style>
     body {
@@ -21,19 +20,20 @@
     .container {
       text-align: center;
       background: rgba(255, 255, 255, 0.95);
-      padding: 35px 25px;
+      padding: 30px 20px;
       border-radius: 30px;
       box-shadow: 0 15px 35px rgba(255, 107, 107, 0.2);
       z-index: 10;
       width: 85%;
-      max-width: 450px;
+      max-width: 400px;
+      transition: all 0.5s ease;
     }
-    h1 { color: #e53e3e; font-size: 1.6rem; margin-bottom: 35px; line-height: 1.4; }
+    h1 { color: #e53e3e; font-size: 1.6rem; margin-bottom: 30px; line-height: 1.4; }
 
     .btns {
       display: flex;
       justify-content: center;
-      gap: 25px;
+      gap: 20px;
       margin-top: 20px;
       min-height: 60px;
     }
@@ -53,12 +53,44 @@
     #yes { background: #ff7675; color: white; box-shadow: 0 5px 15px rgba(255, 118, 117, 0.4); }
     #no { background: #b2bec3; color: white; }
 
+    /* 菜单区域 */
+    #menu {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      background: #fff0f0;
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px dashed #ffb6b6;
+    }
+    #menu h3 { margin: 0 0 10px 0; color: #d63031; font-size: 18px; }
+    #menu p { margin: 5px 0; color: #636e72; font-size: 16px; text-align: left; padding-left: 20px; }
+
+    .qr-img {
+      width: 180px;
+      height: 180px;
+      margin: 15px auto;
+      border-radius: 10px;
+      display: block;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .pay-text {
+      font-size: 14px !important;
+      color: #ff7675 !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      font-weight: bold;
+    }
+
+    .evidence { margin-top: 10px; color: #b2bec3; font-size: 12px; }
+
+    /* 爱心基础样式 */
     .heart {
       position: absolute;
-      font-size: 20px;
       color: #ff7675;
-      animation: move 3s linear infinite;
+      animation: move 3s linear infinite; /* 3秒飘完 */
       z-index: 5;
+      pointer-events: none; /* 让鼠标可以透过爱心点击 */
     }
     @keyframes move {
       0% { transform: translateY(0) rotate(0deg); opacity: 1; }
@@ -74,9 +106,21 @@
 
 <div class="container">
   <h1 id="question">姐姐，你愿意请你弟弟吃好吃的吗？🥺</h1>
-  <div class="btns">
+
+  <div class="btns" id="btn-group">
     <button id="yes" onclick="celebrate()">愿意</button>
     <button id="no" onmouseover="flyAway()" ontouchstart="flyAway()">不愿意</button>
+  </div>
+
+  <div id="menu">
+    <h3>🎉 签约成功！</h3>
+    <p>✅ 豪华火锅 x 1顿</p>
+    <p>✅ 大杯奶茶 x 2杯</p>
+
+    <img src="pay.jpg" alt="收款码加载中..." class="qr-img">
+    <p class="pay-text">（ 扫码直接兑现 🤣 ）</p>
+
+    <div class="evidence">（已自动截图，长按保存证据）</div>
   </div>
 </div>
 
@@ -95,24 +139,32 @@
     audio.play();
 
     document.getElementById('question').innerHTML = "我就知道！你是全天下最好的姐姐！💖";
-    document.getElementById('no').style.display = 'none';
+    document.getElementById('btn-group').style.display = 'none';
+    document.getElementById('menu').style.display = 'block';
 
-    const yesBtn = document.getElementById('yes');
-    yesBtn.innerText = "爱你哟 😘";
-    yesBtn.style.transform = "scale(1.1)";
-
-    setInterval(createHeart, 200);
+    // --- 改动在这里 ---
+    // 以前是 200毫秒生成一个，现在是 50毫秒生成一个（快了4倍）
+    setInterval(createHeart, 50);
   }
 
   function createHeart() {
     const heart = document.createElement('div');
     heart.classList.add('heart');
     heart.innerHTML = '❤️';
+
+    // --- 新增：随机大小 ---
+    // 爱心大小在 15px 到 35px 之间随机，看起来更丰富
+    const size = Math.random() * 20 + 15;
+    heart.style.fontSize = size + 'px';
+
     heart.style.left = Math.random() * 100 + 'vw';
     heart.style.top = '100vh';
-    heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+
+    // 随机飘动速度（2秒到5秒之间）
+    heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+
     document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 3000);
+    setTimeout(() => heart.remove(), 5000);
   }
 </script>
 
